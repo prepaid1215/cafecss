@@ -1,0 +1,1004 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#ffffff">
+<title>카페·블로그 HTML 빌더 v9 Mobile</title>
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:var(--font-sans);}
+#app{display:flex;flex-direction:column;height:100vh;min-height:620px;}
+.topbar{display:flex;align-items:center;gap:8px;padding:7px 12px;border-bottom:0.5px solid var(--border);background:var(--surface-1);flex-wrap:wrap;flex-shrink:0;}
+.topbar-title{font-size:13px;font-weight:500;color:var(--text-primary);}
+.btn{font-size:12px;padding:5px 11px;border-radius:var(--radius);border:0.5px solid var(--border-strong);background:var(--surface-2);color:var(--text-primary);cursor:pointer;display:inline-flex;align-items:center;gap:4px;transition:transform .1s ease,background .12s;}
+.btn:hover{background:var(--surface-1);}
+.btn:active{transform:scale(0.95);background:var(--surface-1);}
+.btn.p{background:var(--fill-accent);color:var(--on-accent);border-color:var(--fill-accent);}
+.btn.p:hover{opacity:.88;}
+.btn.p:active{transform:scale(0.95);opacity:.8;}
+.body{display:flex;flex:1;overflow:hidden;min-height:0;}
+
+.left{width:210px;flex-shrink:0;border-right:0.5px solid var(--border);background:var(--surface-1);overflow-y:auto;padding-bottom:16px;}
+.sh{font-size:10px;font-weight:500;color:var(--text-muted);padding:9px 12px 3px;text-transform:uppercase;letter-spacing:.06em;}
+.cr{padding:3px 12px;display:flex;flex-direction:column;gap:3px;}
+.cr label{font-size:11px;color:var(--text-secondary);}
+.cr select{width:100%;font-size:11.5px;padding:3px 6px;border:0.5px solid var(--border);border-radius:var(--radius);background:var(--surface-2);color:var(--text-primary);}
+.cr input[type=text]{width:100%;font-size:11.5px;padding:3px 6px;border:0.5px solid var(--border);border-radius:var(--radius);background:var(--surface-2);color:var(--text-primary);}
+.tr{padding:3px 12px;display:flex;align-items:center;justify-content:space-between;}
+.tr label{font-size:11px;color:var(--text-secondary);}
+.tg{position:relative;width:28px;height:16px;cursor:pointer;}
+.tg input{opacity:0;width:0;height:0;}
+.tgs{position:absolute;inset:0;border-radius:8px;background:var(--border-strong);transition:.2s;}
+.tg input:checked+.tgs{background:var(--fill-accent);}
+.tgs:before{content:'';position:absolute;width:12px;height:12px;left:2px;top:2px;border-radius:50%;background:#fff;transition:.2s;}
+.tg input:checked+.tgs:before{transform:translateX(12px);}
+.div{border:none;border-top:0.5px solid var(--border);margin:5px 0;}
+
+.palette-wrap{padding:4px 12px;}
+.palette-row{display:flex;gap:3px;margin-bottom:3px;}
+.pc{width:18px;height:18px;border-radius:3px;cursor:pointer;border:2px solid transparent;flex-shrink:0;transition:transform .12s ease;}
+.pc:hover{transform:scale(1.15);}
+.pc:active{transform:scale(0.85);}
+.pc.on{border-color:#000;transform:scale(1.15);box-shadow:0 0 0 2px #fff inset;}
+.custom-color-row{display:flex;align-items:center;gap:6px;padding:3px 12px;}
+.custom-color-row label{font-size:11px;color:var(--text-secondary);}
+.custom-color-row input[type=color]{width:28px;height:22px;border:0.5px solid var(--border);border-radius:3px;cursor:pointer;padding:1px;}
+.custom-color-row input[type=text]{flex:1;font-size:11px;padding:2px 5px;border:0.5px solid var(--border);border-radius:var(--radius);background:var(--surface-2);color:var(--text-primary);}
+.color-preview{display:flex;align-items:center;gap:4px;padding:3px 12px 5px;}
+.cp-dot{width:14px;height:14px;border-radius:3px;}
+.cp-label{font-size:10px;color:var(--text-muted);}
+
+.style-grid{display:flex;gap:5px;flex-wrap:wrap;padding:4px 12px;}
+.style-thumb{border:1.5px solid var(--border);border-radius:5px;padding:4px 6px;cursor:pointer;font-size:10px;color:var(--text-secondary);background:var(--surface-2);transition:transform .1s ease,border-color .12s,background .12s,color .12s;text-align:center;min-width:56px;}
+.style-thumb:hover{border-color:var(--border-strong);}
+.style-thumb:active{transform:scale(0.93);}
+.style-thumb.on{border-color:var(--fill-accent);background:var(--fill-accent);color:var(--on-accent);font-weight:600;}
+
+.mid{flex:1;display:flex;flex-direction:column;overflow:hidden;border-right:0.5px solid var(--border);}
+.panel-hd{font-size:11px;font-weight:500;color:var(--text-muted);padding:5px 12px;border-bottom:0.5px solid var(--border);background:var(--surface-1);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+#editor{flex:1;border:none;outline:none;resize:none;padding:12px;font-family:var(--font-mono);font-size:12px;line-height:1.7;background:var(--surface-2);color:var(--text-primary);}
+.preview-panel{width:360px;flex-shrink:0;display:flex;flex-direction:column;overflow:hidden;}
+.preview-hd{font-size:11px;font-weight:500;color:var(--text-muted);padding:5px 12px;border-bottom:0.5px solid var(--border);background:var(--surface-1);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+#preview{flex:1;border:none;width:100%;background:#fff;}
+.bot{padding:4px 12px;border-top:0.5px solid var(--border);background:var(--surface-1);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+.st{font-size:11px;color:var(--text-muted);}
+
+:root{
+  --font-sans:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Noto Sans KR","Malgun Gothic",Arial,sans-serif;
+  --font-mono:"SFMono-Regular",Consolas,"Liberation Mono",monospace;
+  --surface-1:#f7f8fa;
+  --surface-2:#ffffff;
+  --text-primary:#171719;
+  --text-secondary:#4b5563;
+  --text-muted:#7b8494;
+  --border:#e5e7eb;
+  --border-strong:#cbd5e1;
+  --fill-accent:#0A6EFA;
+  --on-accent:#ffffff;
+  --radius:6px;
+}
+html,body{width:100%;height:100%;overflow:hidden;background:var(--surface-2);}
+body{-webkit-text-size-adjust:100%;touch-action:manipulation;}
+.mobile-tabs{display:none;}
+
+@media (max-width:900px){
+  #app{height:100dvh;min-height:0;padding-bottom:58px;}
+  .topbar{flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;padding:8px;gap:6px;scrollbar-width:none;}
+  .topbar::-webkit-scrollbar{display:none;}
+  .topbar-title{min-width:max-content;font-size:12px;}
+  .topbar .btn{min-height:38px;padding:7px 10px;white-space:nowrap;font-size:12px;}
+  .body{display:block;position:relative;overflow:hidden;}
+  .left,.mid,.preview-panel{position:absolute;inset:0;width:100%;height:100%;border:0;display:none;background:var(--surface-2);}
+  .left.mobile-on,.mid.mobile-on,.preview-panel.mobile-on{display:flex;}
+  .left.mobile-on{display:block;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-bottom:24px;}
+  .mid.mobile-on{display:flex;}
+  .preview-panel.mobile-on{display:flex;}
+  .sh{font-size:12px;padding:13px 14px 5px;}
+  .cr,.tr,.palette-wrap,.custom-color-row,.style-grid{padding-left:14px;padding-right:14px;}
+  .style-thumb{font-size:12px;min-width:64px;padding:8px 9px;}
+  .cr label,.tr label{font-size:12px;}
+  .cr input[type=text],.cr select{font-size:16px;min-height:42px;padding:8px 10px;}
+  .pc{width:25px;height:25px;}
+  .custom-color-row input[type=text]{font-size:16px;min-height:38px;}
+  .custom-color-row input[type=color]{width:38px;height:34px;}
+  .tg{width:42px;height:24px;}
+  .tgs{border-radius:12px;}
+  .tgs:before{width:20px;height:20px;}
+  .tg input:checked+.tgs:before{transform:translateX(18px);}
+  .panel-hd,.preview-hd{min-height:42px;padding:8px 12px;font-size:12px;}
+  #editor{font-size:16px;line-height:1.7;padding:14px 14px 90px;}
+  #preview{min-height:0;}
+  .bot{display:none;}
+  .mobile-tabs{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    position:fixed;
+    left:0;
+    right:0;
+    bottom:0;
+    z-index:9999;
+    height:58px;
+    padding-bottom:env(safe-area-inset-bottom);
+    background:rgba(255,255,255,.96);
+    border-top:1px solid var(--border);
+    box-shadow:0 -2px 12px rgba(0,0,0,.06);
+  }
+  .mobile-tab{border:0;background:transparent;font:inherit;font-size:12px;color:var(--text-muted);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-width:0;}
+  .mobile-tab b{font-size:17px;line-height:1;}
+  .mobile-tab.on{color:var(--fill-accent);font-weight:700;}
+}
+
+@media (min-width:901px) and (max-width:1180px){
+  .left{width:200px;}
+  .preview-panel{width:320px;}
+}
+
+.mobile-toast{display:none;}
+@media (max-width:900px){
+  .mobile-toast{
+    display:block;
+    position:fixed;
+    left:14px;
+    right:14px;
+    bottom:70px;
+    z-index:10000;
+    background:rgba(17,24,39,.94);
+    color:#fff;
+    padding:10px 12px;
+    border-radius:9px;
+    font-size:12px;
+    line-height:1.45;
+    text-align:center;
+    opacity:0;
+    pointer-events:none;
+    transform:translateY(8px);
+    transition:.2s;
+  }
+  .mobile-toast.show{opacity:1;transform:translateY(0);}
+}
+</style>
+</head>
+
+<body>
+<div id="app">
+
+  <div class="topbar">
+    <span class="topbar-title">카페·블로그 HTML 빌더 v9</span>
+    <button class="btn p" onclick="openNewTab()">새 탭 확인</button>
+    <button class="btn p" onclick="copyHtml()">HTML 복사</button>
+    <button class="btn" onclick="loadSample()">샘플</button>
+    <span style="width:1px;height:18px;background:var(--border-strong);margin:0 2px;"></span>
+    <button class="btn" onclick="loadTest('toc')">목차만</button>
+    <button class="btn" onclick="loadTest('h2')">H2만</button>
+    <button class="btn" onclick="loadTest('h3')">H3만</button>
+    <button class="btn" onclick="loadTest('table')">표만</button>
+    <button class="btn" onclick="loadTest('list')">리스트만</button>
+    <button class="btn" onclick="loadTest('qa')">Q&A만</button>
+    <button class="btn" onclick="clr()">초기화</button>
+  </div>
+
+  <div class="body">
+
+    <div class="left">
+
+      <div class="sh">색상</div>
+
+      <div class="style-grid" id="colormode-styles">
+        <div class="style-thumb on" data-v="single" onclick="setColorMode('single',this)">기존</div>
+        <div class="style-thumb" data-v="scheme" onclick="setColorMode('scheme',this)">색조합</div>
+        <div class="style-thumb" data-v="custom" onclick="setColorMode('custom',this)">마음대로</div>
+      </div>
+
+      <div id="mode-single">
+        <div class="palette-wrap" id="palette"></div>
+
+        <div class="custom-color-row">
+          <label>직접 입력</label>
+          <input type="color" id="cpicker" value="#ff2d78" oninput="setColorFromPicker(this.value)">
+          <input type="text" id="chex" value="#ff2d78" maxlength="7" oninput="setColorFromHex(this.value)">
+        </div>
+
+        <div class="color-preview">
+          <div class="cp-dot" id="cp-dot" style="background:#ff2d78;"></div>
+          <div class="cp-dot" id="cp-light" style="background:#fff0f5;border:1px solid #ffb3cc;"></div>
+          <span class="cp-label" id="cp-hex">#ff2d78</span>
+        </div>
+      </div>
+
+      <div id="mode-scheme" style="display:none;">
+        <div id="scheme-list" style="padding:4px 12px;display:flex;flex-direction:column;gap:6px;"></div>
+      </div>
+
+      <div id="mode-custom" style="display:none;">
+        <div id="slot-list" style="padding-top:2px;"></div>
+      </div>
+
+      <div class="div"></div>
+
+      <div class="sh">목차 스타일</div>
+      <div class="style-grid" id="toc-styles">
+        <div class="style-thumb on" data-v="box" onclick="pickStyle('toc',this)">박스형</div>
+        <div class="style-thumb" data-v="line" onclick="pickStyle('toc',this)">왼쪽선</div>
+        <div class="style-thumb" data-v="pill" onclick="pickStyle('toc',this)">배지형</div>
+        <div class="style-thumb" data-v="clean" onclick="pickStyle('toc',this)">심플</div>
+      </div>
+
+      <div class="div"></div>
+
+      <div class="sh">H2 소제목</div>
+      <div class="style-grid" id="h2-styles">
+        <div class="style-thumb on" data-v="leftborder" onclick="pickStyle('h2',this)">왼쪽선+배경</div>
+        <div class="style-thumb" data-v="underline" onclick="pickStyle('h2',this)">밑줄</div>
+        <div class="style-thumb" data-v="fill" onclick="pickStyle('h2',this)">꽉찬배경</div>
+        <div class="style-thumb" data-v="badge" onclick="pickStyle('h2',this)">배지</div>
+        <div class="style-thumb" data-v="double" onclick="pickStyle('h2',this)">이중선</div>
+        <div class="style-thumb" data-v="shadow" onclick="pickStyle('h2',this)">그림자</div>
+      </div>
+
+      <div class="div"></div>
+
+      <div class="sh">H3 소소제목</div>
+      <div class="style-grid" id="h3-styles">
+        <div class="style-thumb on" data-v="leftline" onclick="pickStyle('h3',this)">왼쪽선</div>
+        <div class="style-thumb" data-v="dot" onclick="pickStyle('h3',this)">동그라미</div>
+        <div class="style-thumb" data-v="arrow" onclick="pickStyle('h3',this)">화살표</div>
+        <div class="style-thumb" data-v="under" onclick="pickStyle('h3',this)">밑줄</div>
+        <div class="style-thumb" data-v="hash" onclick="pickStyle('h3',this)"># 해시</div>
+      </div>
+
+      <div class="div"></div>
+
+      <div class="sh">표 스타일</div>
+      <div class="style-grid" id="table-styles">
+        <div class="style-thumb on" data-v="default" onclick="pickStyle('table',this)">기본줄무늬</div>
+        <div class="style-thumb" data-v="minimal" onclick="pickStyle('table',this)">미니멀</div>
+        <div class="style-thumb" data-v="dark" onclick="pickStyle('table',this)">다크헤더</div>
+        <div class="style-thumb" data-v="border" onclick="pickStyle('table',this)">외곽선만</div>
+        <div class="style-thumb" data-v="clean" onclick="pickStyle('table',this)">줄무늬없음</div>
+      </div>
+
+      <div class="div"></div>
+
+      <div class="sh">구성 요소</div>
+
+      <div class="tr">
+        <label>목차 자동 생성</label>
+        <label class="tg">
+          <input type="checkbox" id="toc" checked onchange="autoPreview()">
+          <span class="tgs"></span>
+        </label>
+      </div>
+
+      <div class="tr">
+        <label>CTA 버튼</label>
+        <label class="tg">
+          <input type="checkbox" id="cta" checked onchange="autoPreview()">
+          <span class="tgs"></span>
+        </label>
+      </div>
+
+      <div class="div"></div>
+
+      <div class="sh">CTA 설정</div>
+      <div class="cr"><label>버튼1</label><input type="text" id="ct1" value="👉 셀프개통 신청하기" oninput="autoPreview()"></div>
+      <div class="cr"><label>링크1</label><input type="text" id="cu1" value="https://59man.shop" oninput="autoPreview()"></div>
+      <div class="cr"><label>버튼2</label><input type="text" id="ct2" value="💬 카카오톡 1:1 상담" oninput="autoPreview()"></div>
+      <div class="cr"><label>링크2</label><input type="text" id="cu2" value="http://pf.kakao.com/_akxmKn/chat" oninput="autoPreview()"></div>
+
+    </div>
+
+    <div class="mid">
+      <div class="panel-hd">
+        <span>본문 입력 (마크다운 OK)</span>
+        <span id="cnt">0자</span>
+      </div>
+
+<textarea id="editor">마크다운 문법 가이드
+
+## 이건 H2 제목이에요
+
+이 아래 줄이 본문 텍스트예요. **굵게**는 별표 두개, *기울임*은 별표 한개로 써요.
+
+### 이건 H3 소제목이에요
+
+H3 밑에는 일반 문단을 씁니다.
+
+> 이건 인용문/팁 박스예요.
+
+- 글머리 리스트
+- 두 번째 항목
+- 세 번째 항목
+
+1. 번호 리스트
+2. 두 번째
+3. 세 번째
+
+| 요금제 | 데이터 | 속도 |
+|---|---|---|
+| 396 | 10.3GB | 3Mbps |
+| 459 | 20.3GB | 3Mbps |
+
+Q. 질문입니다?
+A. 답변입니다.</textarea>
+
+    </div>
+
+    <div class="preview-panel">
+      <div class="preview-hd">
+        <span>미리보기</span>
+        <button class="btn" onclick="openNewTab()">새 탭 → 복사</button>
+      </div>
+      <iframe id="preview" sandbox="allow-same-origin allow-scripts"></iframe>
+    </div>
+
+  </div>
+
+  <div class="bot">
+    <span class="st" id="st">HTML 빌더 준비 완료</span>
+  </div>
+
+  <nav class="mobile-tabs">
+    <button class="mobile-tab" data-panel="left" onclick="showMobilePanel('left',this)">
+      <b>⚙</b>
+      <span>설정</span>
+    </button>
+
+    <button class="mobile-tab on" data-panel="mid" onclick="showMobilePanel('mid',this)">
+      <b>✎</b>
+      <span>본문작성</span>
+    </button>
+
+    <button class="mobile-tab" data-panel="preview-panel" onclick="showMobilePanel('preview-panel',this)">
+      <b>◉</b>
+      <span>미리보기</span>
+    </button>
+  </nav>
+
+  <div id="mobile-toast" class="mobile-toast"></div>
+
+</div>
+
+<script>
+
+var PALETTE=[
+['#ff2d78','#ff5a9a','#ff80bb','#ffb3cc','#ffe0ec'],
+['#e53e3e','#f56565','#fc8181','#feb2b2','#fff5f5'],
+['#dd6b20','#ed8936','#f6ad55','#fbd38d','#fffaf0'],
+['#d69e2e','#ecc94b','#f6e05e','#faf089','#fffff0'],
+['#38a169','#48bb78','#68d391','#9ae6b4','#f0fff4'],
+['#059669','#10b981','#34d399','#6ee7b7','#ecfdf5'],
+['#0A6EFA','#3b82f6','#60a5fa','#93c5fd','#eff6ff'],
+['#0891b2','#06b6d4','#22d3ee','#67e8f9','#ecfeff'],
+['#7c3aed','#8b5cf6','#a78bfa','#c4b5fd','#f5f3ff'],
+['#374151','#4b5563','#6b7280','#9ca3af','#f9fafb']
+];
+
+function mixWhite(hex,ratio){
+hex=hex.replace('#','');
+var r=parseInt(hex.slice(0,2),16);
+var g=parseInt(hex.slice(2,4),16);
+var b=parseInt(hex.slice(4,6),16);
+
+r=Math.round(r+(255-r)*ratio);
+g=Math.round(g+(255-g)*ratio);
+b=Math.round(b+(255-b)*ratio);
+
+return '#'+[r,g,b].map(function(v){
+return ('0'+v.toString(16)).slice(-2);
+}).join('');
+}
+
+function getLight(c){return mixWhite(c,.9);}
+function getBorder(c){return mixWhite(c,.55);}
+
+var color='#ff2d78';
+
+var SC={
+toc:color,
+h2:color,
+h3:color,
+table:color,
+accent:color,
+cta:color
+};
+
+var tocStyle='box';
+var h2Style='leftborder';
+var h3Style='leftline';
+var tableStyle='default';
+var previewTimer;
+
+(function(){
+var wrap=document.getElementById('palette');
+
+PALETTE.forEach(function(row){
+var d=document.createElement('div');
+d.className='palette-row';
+
+row.forEach(function(c){
+var s=document.createElement('div');
+s.className='pc';
+s.style.background=c;
+s.onclick=function(){
+setColor(c);
+};
+d.appendChild(s);
+});
+
+wrap.appendChild(d);
+});
+})();
+
+function setColor(c){
+color=c;
+
+SC.toc=c;
+SC.h2=c;
+SC.h3=c;
+SC.table=c;
+SC.accent=c;
+SC.cta=c;
+
+document.getElementById('cpicker').value=c;
+document.getElementById('chex').value=c;
+document.getElementById('cp-dot').style.background=c;
+document.getElementById('cp-light').style.background=getLight(c);
+document.getElementById('cp-hex').textContent=c;
+
+autoPreview();
+}
+
+function setColorFromPicker(v){
+setColor(v);
+}
+
+function setColorFromHex(v){
+if(/^#[0-9a-fA-F]{6}$/.test(v)){
+setColor(v);
+}
+}
+
+var SCHEMES=[
+{name:'오션',toc:'#2563eb',h2:'#1d4ed8',h3:'#3b82f6',table:'#0891b2',accent:'#0891b2',cta:'#2563eb'},
+{name:'선셋',toc:'#f97316',h2:'#ea580c',h3:'#fb923c',table:'#e11d48',accent:'#f97316',cta:'#e11d48'},
+{name:'포레스트',toc:'#16a34a',h2:'#15803d',h3:'#22c55e',table:'#65a30d',accent:'#16a34a',cta:'#15803d'},
+{name:'베리',toc:'#7c3aed',h2:'#6d28d9',h3:'#8b5cf6',table:'#c026d3',accent:'#7c3aed',cta:'#6d28d9'}
+];
+
+function renderSchemes(){
+
+var wrap=document.getElementById('scheme-list');
+
+SCHEMES.forEach(function(s){
+
+var row=document.createElement('div');
+
+row.style.cssText=
+'padding:8px;border:1px solid #ddd;border-radius:6px;cursor:pointer;font-size:12px;';
+
+row.textContent=s.name;
+
+row.onclick=function(){
+
+Object.assign(SC,s);
+
+autoPreview();
+
+};
+
+wrap.appendChild(row);
+
+});
+}
+
+renderSchemes();
+
+function setColorMode(mode,el){
+
+document.querySelectorAll('#colormode-styles .style-thumb')
+.forEach(function(x){
+x.classList.remove('on');
+});
+
+el.classList.add('on');
+
+document.getElementById('mode-single').style.display=
+mode==='single'?'':'none';
+
+document.getElementById('mode-scheme').style.display=
+mode==='scheme'?'':'none';
+
+document.getElementById('mode-custom').style.display=
+mode==='custom'?'':'none';
+
+}
+
+function pickStyle(type,el){
+
+el.parentElement.querySelectorAll('.style-thumb')
+.forEach(function(x){
+x.classList.remove('on');
+});
+
+el.classList.add('on');
+
+if(type==='toc')tocStyle=el.dataset.v;
+if(type==='h2')h2Style=el.dataset.v;
+if(type==='h3')h3Style=el.dataset.v;
+if(type==='table')tableStyle=el.dataset.v;
+
+autoPreview();
+}
+
+function inlineMd(text){
+
+var c=SC.accent;
+
+return text
+.replace(/\*\*(.+?)\*\*/g,'<b style="color:'+c+'">$1</b>')
+.replace(/\*(.+?)\*/g,'<i>$1</i>')
+.replace(/\[([^\]]+)\]\(([^)]+)\)/g,'<a href="$2" target="_blank">$1</a>');
+
+}
+
+function makeH2(txt,id){
+
+var c=SC.h2;
+var light=getLight(c);
+
+if(h2Style==='fill')
+return '<h2 id="'+id+'" style="background:'+c+';color:white;padding:12px;border-radius:6px">'+txt+'</h2>';
+
+if(h2Style==='underline')
+return '<h2 id="'+id+'" style="border-bottom:3px solid '+c+';padding:10px">'+txt+'</h2>';
+
+return '<h2 id="'+id+'" style="background:'+light+';border-left:5px solid '+c+';padding:12px;margin:25px 0 12px">'+txt+'</h2>';
+
+}
+
+function makeH3(txt){
+
+var c=SC.h3;
+
+if(h3Style==='dot')
+return '<h3 style="margin:20px 0">● '+txt+'</h3>';
+
+if(h3Style==='arrow')
+return '<h3 style="margin:20px 0">▶ '+txt+'</h3>';
+
+return '<h3 style="border-left:4px solid '+c+';padding-left:10px;margin:20px 0">'+txt+'</h3>';
+
+}
+
+function renderParts(){
+
+var raw=document.getElementById('editor').value;
+
+var lines=raw.split('\n');
+
+var out='';
+var tocItems=[];
+var h2count=0;
+
+lines.forEach(function(line){
+
+var t=line.trim();
+
+if(t.startsWith('## ')){
+
+var title=t.slice(3);
+
+tocItems.push(title);
+
+out+=makeH2(title,'sec'+(++h2count));
+
+}
+
+else if(t.startsWith('### ')){
+
+out+=makeH3(t.slice(4));
+
+}
+
+else if(t.startsWith('> ')){
+
+out+='<div style="background:'+getLight(SC.accent)+';padding:12px;border-radius:6px;margin:12px 0">'+inlineMd(t.slice(2))+'</div>';
+
+}
+
+else if(t.startsWith('- ')){
+
+out+='<div style="padding:4px">✔ '+inlineMd(t.slice(2))+'</div>';
+
+}
+
+else if(/^\d+\.\s/.test(t)){
+
+out+='<div style="padding:6px">'+inlineMd(t)+'</div>';
+
+}
+
+else if(t.startsWith('|')){
+
+out+='<div style="font-family:monospace;padding:4px">'+inlineMd(t)+'</div>';
+
+}
+
+else if(t){
+
+out+='<p style="font-size:15px;line-height:1.9;margin:10px 0">'+inlineMd(t)+'</p>';
+
+}
+
+});
+
+var toc='';
+
+if(document.getElementById('toc').checked && tocItems.length){
+
+toc='<div style="background:'+getLight(SC.toc)+';padding:15px;border-radius:8px;margin-bottom:20px"><b>목차</b><br>';
+
+tocItems.forEach(function(t,i){
+
+toc+=(i+1)+'. '+t+'<br>';
+
+});
+
+toc+='</div>';
+
+}
+
+var cta='';
+
+if(document.getElementById('cta').checked){
+
+var ct1=document.getElementById('ct1').value;
+var cu1=document.getElementById('cu1').value;
+var ct2=document.getElementById('ct2').value;
+var cu2=document.getElementById('cu2').value;
+
+cta=
+'<div style="padding:16px;background:'+getLight(SC.cta)+';text-align:center;margin-top:20px">'+
+'<a href="'+cu1+'" target="_blank" style="font-weight:bold;color:'+SC.cta+'">'+ct1+'</a>'+
+'<br><br>'+
+'<a href="'+cu2+'" target="_blank" style="font-weight:bold;color:'+SC.cta+'">'+ct2+'</a>'+
+'</div>';
+
+}
+
+return{
+toc:toc,
+body:out,
+cta:cta
+};
+
+}
+
+function buildHtml(){
+
+var p=renderParts();
+
+return '<!doctype html><html lang="ko"><head><meta charset="utf-8">'+
+'<meta name="viewport" content="width=device-width,initial-scale=1">'+
+'</head><body style="font-family:Arial,Malgun Gothic,sans-serif;padding:16px">'+
+p.toc+p.body+p.cta+
+'</body></html>';
+
+}
+
+function buildContent(){
+
+var p=renderParts();
+
+return '<div style="max-width:800px;margin:auto;font-family:Arial,Malgun Gothic,sans-serif">'+
+p.toc+p.body+p.cta+
+'</div>';
+
+}
+
+function autoPreview(){
+
+clearTimeout(previewTimer);
+
+previewTimer=setTimeout(function(){
+
+document.getElementById('preview').srcdoc=buildHtml();
+
+},200);
+
+}
+
+function openNewTab(){
+
+var w=window.open('','_blank');
+
+if(!w){
+setStatus('팝업이 차단되었습니다.');
+return;
+}
+
+w.document.write(buildHtml());
+
+w.document.close();
+
+}
+
+function copyHtml(){
+
+var src=buildContent();
+
+if(navigator.clipboard){
+
+navigator.clipboard.writeText(src)
+.then(function(){
+
+setStatus('HTML 복사 완료');
+
+});
+
+}else{
+
+openSource(src);
+
+}
+
+}
+
+function openSource(src){
+
+var w=window.open('','_blank');
+
+w.document.write(
+'<textarea style="width:100%;height:100vh">'+
+src.replace(/</g,'&lt;')+
+'</textarea>'
+);
+
+}
+
+function setStatus(m){
+
+var st=document.getElementById('st');
+
+if(st)st.textContent=m;
+
+if(window.innerWidth<=900){
+
+var toast=document.getElementById('mobile-toast');
+
+toast.textContent=m;
+
+toast.classList.add('show');
+
+setTimeout(function(){
+
+toast.classList.remove('show');
+
+},2000);
+
+}
+
+}
+
+function clr(){
+
+document.getElementById('editor').value='';
+
+localStorage.removeItem('cafe_blog_builder_v9_draft');
+
+autoPreview();
+
+}
+
+var SAMPLE=`선불폰도 핫스팟 되나요?
+
+## 핫스팟 사용법
+
+폰 설정에서 개인용 핫스팟을 켜면 됩니다.
+
+## 요금제 비교
+
+| 요금제 | 데이터 | 속도 |
+|---|---|---|
+| 396 | 10.3GB | 3Mbps |
+| 459 | 20.3GB | 3Mbps |
+
+## 주의사항
+
+- 데이터 사용량을 확인하세요.
+- 장시간 사용 시 배터리 소모가 커질 수 있습니다.
+
+Q. 핫스팟 사용할 수 있나요?
+A. 사용할 수 있습니다.`;
+
+var TESTS={
+
+toc:`목차 테스트
+
+## 첫 번째 제목
+
+내용입니다.
+
+## 두 번째 제목
+
+내용입니다.`,
+
+h2:`H2 테스트
+
+## 첫번째 H2
+
+내용
+
+## 두번째 H2
+
+내용`,
+
+h3:`H3 테스트
+
+### 첫번째 H3
+
+내용
+
+### 두번째 H3
+
+내용`,
+
+table:`표 테스트
+
+| 요금제 | 데이터 |
+|---|---|
+| 396 | 10.3GB |
+| 459 | 20.3GB |`,
+
+list:`리스트 테스트
+
+- 첫번째
+- 두번째
+
+1. 번호
+2. 번호`,
+
+qa:`Q&A 테스트
+
+Q. 질문입니다?
+A. 답변입니다.`
+
+};
+
+function loadSample(){
+
+document.getElementById('editor').value=SAMPLE;
+
+autoPreview();
+
+}
+
+function loadTest(type){
+
+document.getElementById('editor').value=TESTS[type];
+
+autoPreview();
+
+}
+
+var DRAFT_KEY='cafe_blog_builder_v9_draft';
+
+try{
+
+var saved=localStorage.getItem(DRAFT_KEY);
+
+if(saved){
+
+document.getElementById('editor').value=saved;
+
+}
+
+}catch(e){}
+
+document.getElementById('editor')
+.addEventListener('input',function(){
+
+try{
+
+localStorage.setItem(DRAFT_KEY,this.value);
+
+}catch(e){}
+
+document.getElementById('cnt').textContent=
+this.value.length.toLocaleString()+'자';
+
+autoPreview();
+
+});
+
+function showMobilePanel(panelClass,btn){
+
+if(window.innerWidth>900)return;
+
+document.querySelectorAll('.left,.mid,.preview-panel')
+.forEach(function(el){
+
+el.classList.remove('mobile-on');
+
+});
+
+var target=document.querySelector('.'+panelClass);
+
+if(target){
+
+target.classList.add('mobile-on');
+
+}
+
+document.querySelectorAll('.mobile-tab')
+.forEach(function(x){
+
+x.classList.remove('on');
+
+});
+
+btn.classList.add('on');
+
+if(panelClass==='preview-panel'){
+
+autoPreview();
+
+}
+
+}
+
+function syncResponsivePanels(){
+
+if(window.innerWidth<=900){
+
+var active=document.querySelector('.mobile-tab.on');
+
+var cls=active ? active.dataset.panel : 'mid';
+
+document.querySelectorAll('.left,.mid,.preview-panel')
+.forEach(function(el){
+
+el.classList.remove('mobile-on');
+
+});
+
+var target=document.querySelector('.'+cls);
+
+if(target){
+
+target.classList.add('mobile-on');
+
+}
+
+}else{
+
+document.querySelectorAll('.left,.mid,.preview-panel')
+.forEach(function(el){
+
+el.classList.remove('mobile-on');
+
+});
+
+}
+
+}
+
+window.addEventListener('resize',syncResponsivePanels);
+
+window.addEventListener('orientationchange',function(){
+
+setTimeout(syncResponsivePanels,150);
+
+});
+
+syncResponsivePanels();
+
+autoPreview();
+
+</script>
+</body>
+</html>
